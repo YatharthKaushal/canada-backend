@@ -1,6 +1,6 @@
+import dotenv from "dotenv";
 import express from "express";
 import { connectDB } from "./db.js";
-import dotenv from "dotenv";
 import router from "./route.js";
 import clerkWebhook from "./routes/clerkWebhook.js";
 

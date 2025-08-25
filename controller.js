@@ -1,4 +1,4 @@
-import User from "./model.js"; // Assuming your schema is exported from model.js
+import User from "./userModel.js"; // Updated to correct model file
 
 // Description: Get all users
 // Route: GET /users
