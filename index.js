@@ -1,39 +1,40 @@
-import dotenv from "dotenv";
 import express from "express";
+import dotenv from "dotenv";
 import { connectDB } from "./db.js";
 import router from "./route.js";
 import clerkWebhook from "./routes/clerkWebhook.js";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Clerk webhook must use raw body
+// Connect to MongoDB via Mongoose
+await connectDB();
+
+// Middleware
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+// Clerk webhook must use raw body before JSON parser
 app.use("/api", clerkWebhook);
 
-// middleware
+// Parse JSON for all other routes
 app.use(express.json());
 
-// routes
+// Application routes
 app.use("/", router);
 
-async function startServer() {
-  try {
-    await connectDB();
-    console.log("Connected to database");
+// Test route
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
-    app.get("/", (req, res) => {
-      res.send("Hello World!");
-    });
-
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (err) {
-    console.error("Failed to connect to database", err);
-    process.exit(1);
-  }
-}
-
-startServer();
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

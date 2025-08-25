@@ -1,10 +1,9 @@
 import express from "express";
 import { Webhook } from "svix";
-import User from "../userModel.js"; // your Mongoose User model
+import User from "../userModel.js";
 
 const router = express.Router();
 
-// Clerk requires raw body for signature verification
 router.post(
   "/clerk-webhook",
   express.raw({ type: "application/json" }),
@@ -41,7 +40,6 @@ router.post(
       const fullName = `${firstName} ${lastName}`.trim() || email;
 
       try {
-        // Only insert if not already in DB
         const existing = await User.findOne({ email });
         if (!existing) {
           await User.create({
