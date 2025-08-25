@@ -1,6 +1,6 @@
 import express from "express";
 import { Webhook } from "svix";
-import User from "../controllers/model.js"; // your Mongoose User model
+import User from "../userModel.js"; // your Mongoose User model
 
 const router = express.Router();
 
