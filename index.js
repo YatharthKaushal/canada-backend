@@ -1,19 +1,18 @@
 import express from "express";
 import dotenv from "dotenv";
-import { connectDB } from "./db.js";
-import router from "./route.js";
-import clerkWebhook from "./routes/clerkWebhook.js";
+import { connectDB } from "./config/db.js";
+import apiRoutes from "./routes/index.js";
+import clerkWebhook from "./routes/clerkWebhook.routes.js";
+import stripeWebhook from "./routes/stripeWebhook.js"; // Use the actual webhook handler
 import cors from "cors";
-
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Connect to MongoDB via Mongoose
 await connectDB();
 
-// Middleware
+// Enable CORS for client
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -21,16 +20,15 @@ app.use(
   })
 );
 
-// Clerk webhook must use raw body before JSON parser
-app.use("/api", clerkWebhook);
+// Stripe webhook must use raw body parser for signature verification
+app.use("/stripe/webhook", stripeWebhook);
 
-// Parse JSON for all other routes
+// Other API routes
 app.use(express.json());
+app.use("/api", clerkWebhook);
+app.use("/api", apiRoutes);
 
-// Application routes
-app.use("/", router);
-
-// Test route
+// Health check route
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });

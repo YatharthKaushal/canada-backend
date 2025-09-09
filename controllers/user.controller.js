@@ -1,144 +1,130 @@
-import User from "./userModel.js"; // Updated to correct model file
+import User from "../models/user.model.js";
 
-// Description: Get all users
-// Route: GET /users
-// req: none
-// res: JSON array of users
+// @desc    Get all users
+// @route   GET /api/users
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
-    res.json(users);
+    res.status(200).json(users);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Description: Get a user by ID
-// Route: GET /users/:id
-// req: params.id
-// res: JSON user object
+// @desc    Get a user by ID
+// @route   GET /api/users/:id
 export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    res.status(200).json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Description: Create a new user
-// Route: POST /users
-// req: body (name, email, etc.)
-// res: JSON created user object
+// @desc    Create a new user
+// @route   POST /api/users
 export const createUser = async (req, res) => {
   try {
-    const user = new User(req.body);
-    await user.save();
+    const user = await User.create(req.body);
     res.status(201).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Description: Update a user by ID
-// Route: PUT /users/:id
-// req: params.id, body (fields to update)
-// res: JSON updated user object
+// @desc    Update a user by ID
+// @route   PUT /api/users/:id
 export const updateUser = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true,
     });
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Description: Delete a user by ID
-// Route: DELETE /users/:id
-// req: params.id
-// res: JSON message
+// @desc    Delete a user by ID
+// @route   DELETE /api/users/:id
 export const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({ message: "User deleted successfully" });
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Description: Update user's current plan
-// Route: PUT /users/:id/current-plan
-// req: params.id, body (currentPlan object)
-// res: JSON updated user object
+// @desc    Update the current plan for a user
+// @route   PUT /api/users/:id/current-plan
 export const updateCurrentPlan = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { currentPlan: req.body.currentPlan },
-      { new: true, runValidators: true }
+      { $set: { activePlan: req.body.activePlan } },
+      { new: true }
     );
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Description: Update user's account status
-// Route: PUT /users/:id/account-status
-// req: params.id, body.accountStatus
-// res: JSON updated user object
+// @desc    Update the account status for a user (example: activate/deactivate)
+// @route   PUT /api/users/:id/account-status
 export const updateAccountStatus = async (req, res) => {
   try {
+    const { status } = req.body;
+    // You may want to add a field like 'accountStatus' in the schema for this
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { accountStatus: req.body.accountStatus },
-      { new: true, runValidators: true }
+      { $set: { accountStatus: status } },
+      { new: true }
     );
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Description: Update user's payment status
-// Route: PUT /users/:id/payment-status
-// req: params.id, body.paymentStatus
-// res: JSON updated user object
+// @desc    Update the payment status for a user
+// @route   PUT /api/users/:id/payment-status
 export const updatePaymentStatus = async (req, res) => {
   try {
+    const { paymentStatus } = req.body;
+    // You may want to add a field like 'paymentStatus' in the schema for this
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { paymentStatus: req.body.paymentStatus },
-      { new: true, runValidators: true }
+      { $set: { paymentStatus } },
+      { new: true }
     );
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Description: Assign a number to user
-// Route: PUT /users/:id/assign-number
-// req: params.id, body.assignedNumber
-// res: JSON updated user object
+// @desc    Assign a number to a user (example: assign phone number)
+// @route   PUT /api/users/:id/assign-number
 export const assignNumber = async (req, res) => {
   try {
+    const { number } = req.body;
+    // You may want to add a field like 'assignedNumber' in the schema for this
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { assignedNumber: req.body.assignedNumber },
-      { new: true, runValidators: true }
+      { $set: { assignedNumber: number } },
+      { new: true }
     );
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
