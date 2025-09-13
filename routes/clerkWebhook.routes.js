@@ -38,6 +38,7 @@ router.post(
       const firstName = data.first_name || "";
       const lastName = data.last_name || "";
       const fullName = `${firstName} ${lastName}`.trim() || email;
+      const clerkId = data.id; // Clerk user ID
 
       try {
         const existing = await User.findOne({ email });
@@ -45,8 +46,11 @@ router.post(
           await User.create({
             name: fullName,
             email,
+            clerk_id: clerkId,
           });
-          console.log(`✅ User created in Mongo: ${email}`);
+          console.log(
+            `✅ User created in Mongo: ${email} (Clerk ID: ${clerkId})`
+          );
         }
       } catch (err) {
         console.error("Error creating user in Mongo:", err.message);
