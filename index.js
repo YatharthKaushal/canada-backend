@@ -22,10 +22,10 @@ app.use(
 
 // Stripe webhook must use raw body parser for signature verification
 app.use("/stripe/webhook", stripeWebhook);
+app.use("/api", clerkWebhook);
 
 // Other API routes
 app.use(express.json());
-app.use("/api", clerkWebhook);
 app.use("/api", apiRoutes);
 
 // Health check route
