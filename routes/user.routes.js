@@ -9,9 +9,23 @@ import {
   updateAccountStatus,
   updatePaymentStatus,
   assignNumber,
+  updateUserByClerkId,
+  updateAgentAndPhoneByClerkId,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
+
+// @route   PUT /api/users/update-agent-and-phone-by-clerk-id
+// @desc    Update agent_id and assigned_phone_number by clerk_id
+router.put("/update-agent-and-phone-by-clerk-id", updateAgentAndPhoneByClerkId);
+
+// @route   GET /api/users
+// @desc    Get all users
+router.get("/", getAllUsers);
+
+// @route   PUT /api/users/update-by-clerk-id
+// @desc    Update user by clerk_id
+router.put("/update-by-clerk-id", updateUserByClerkId);
 
 // @route   GET /api/users
 // @desc    Get all users
@@ -47,6 +61,7 @@ router.put("/:id/payment-status", updatePaymentStatus);
 
 // @route   PUT /api/users/:id/assign-number
 // @desc    Assign a number to a user
+
 router.put("/:id/assign-number", assignNumber);
 
 export default router;

@@ -15,7 +15,20 @@ await connectDB();
 // Enable CORS for client
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        // Add more client URLs or IPs as needed
+        process.env.CLIENT_URL,
+      ].filter(Boolean); // Remove undefined values
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );

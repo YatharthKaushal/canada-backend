@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  agent_id: { type: String, default: "5c916527-2c43-4815-970a-73b43fa6a49f" },
+  assigned_phone_number: { type: String, default: "" },
   clerk_id: { type: String, required: true },
   businessDetails: {
     businessName: { type: String, default: "" },
@@ -10,7 +12,16 @@ const userSchema = new mongoose.Schema({
     businessPhone: { type: String, default: "" },
     bussinessEmail: { type: String, default: "" },
     moreInformation: { type: String, default: "" },
-    faq: { type: [String], default: [] },
+    // faq is now array of { question, answer }
+    faq: {
+      type: [
+        {
+          question: { type: String, required: true },
+          answer: { type: String, required: true },
+        },
+      ],
+      default: [],
+    },
   },
   outboundPrompt: { type: String, default: "" },
   inboundPrompt: { type: String, default: "" },
