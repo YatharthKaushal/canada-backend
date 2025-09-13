@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  clerk_id: { type: String, required: true },
   businessDetails: {
     businessName: { type: String, default: "" },
     data: { type: mongoose.Schema.Types.Mixed },
