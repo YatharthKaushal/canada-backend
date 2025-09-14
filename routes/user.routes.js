@@ -1,14 +1,3 @@
-import {
-  getCalendarTokensByClerkId,
-  getCalendarTokensByAgentId,
-} from "../controllers/user.controller.js";
-// @route   GET /api/users/calendar-tokens/clerk/:clerk_id
-// @desc    Get calendar_tokens by clerk_id
-router.get("/calendar-tokens/clerk/:clerk_id", getCalendarTokensByClerkId);
-
-// @route   GET /api/users/calendar-tokens/agent/:agent_id
-// @desc    Get calendar_tokens by agent_id
-router.get("/calendar-tokens/agent/:agent_id", getCalendarTokensByAgentId);
 import express from "express";
 import {
   getAllUsers,
@@ -22,10 +11,19 @@ import {
   assignNumber,
   updateUserByClerkId,
   updateAgentAndPhoneByClerkId,
+  getCalendarTokensByClerkId,
+  getCalendarTokensByAgentId,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
+// @route   GET /api/users/calendar-tokens/clerk/:clerk_id
+// @desc    Get calendar_tokens by clerk_id
+router.get("/calendar-tokens/clerk/:clerk_id", getCalendarTokensByClerkId);
+
+// @route   GET /api/users/calendar-tokens/agent/:agent_id
+// @desc    Get calendar_tokens by agent_id
+router.get("/calendar-tokens/agent/:agent_id", getCalendarTokensByAgentId);
 // @route   PUT /api/users/update-agent-and-phone-by-clerk-id
 // @desc    Update agent_id and assigned_phone_number by clerk_id
 router.put("/update-agent-and-phone-by-clerk-id", updateAgentAndPhoneByClerkId);
