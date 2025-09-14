@@ -1,3 +1,14 @@
+import {
+  getCalendarTokensByClerkId,
+  getCalendarTokensByAgentId,
+} from "../controllers/user.controller.js";
+// @route   GET /api/users/calendar-tokens/clerk/:clerk_id
+// @desc    Get calendar_tokens by clerk_id
+router.get("/calendar-tokens/clerk/:clerk_id", getCalendarTokensByClerkId);
+
+// @route   GET /api/users/calendar-tokens/agent/:agent_id
+// @desc    Get calendar_tokens by agent_id
+router.get("/calendar-tokens/agent/:agent_id", getCalendarTokensByAgentId);
 import express from "express";
 import {
   getAllUsers,

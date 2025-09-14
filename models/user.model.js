@@ -4,6 +4,10 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   agent_id: { type: String, default: "5c916527-2c43-4815-970a-73b43fa6a49f" },
+  calender_tokens: {
+    refresh_token: { type: String, default: "" },
+    access_token: { type: String, default: "" },
+  },
   assigned_phone_number: { type: String, default: "" },
   clerk_id: { type: String, required: true },
   businessDetails: {
