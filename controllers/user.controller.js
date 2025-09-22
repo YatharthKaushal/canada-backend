@@ -1,3 +1,70 @@
+// @desc    Proxy call to Vapi API with assistant_id from query param
+// @route   POST /api/vapi-call?assistant_id=...
+
+import fetch from "node-fetch";
+
+export const vapiCallHandler = async (req, res) => {
+  try {
+    const assistant_id = "5c916527-2c43-4815-970a-73b43fa6a49f";
+    const response = await fetch(
+      `https://api.vapi.ai/call?assistantId=${assistant_id}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer c25561a2-c5db-4293-9f02-de7715a5e2f3`,
+          // Authorization: `Bearer ${process.env.VAPI_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(req.body),
+      }
+    );
+    const data = await response.json();
+    // console.log(`> vapiCallHandler ${response.status}`, data);
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+// @desc    Update calendar_tokens by clerk_id
+// @route   PUT /api/users/calendar-tokens/clerk/:clerk_id
+export const updateCalendarTokensByClerkId = async (req, res) => {
+  try {
+    const { clerk_id } = req.params;
+    const { refresh_token, access_token } = req.body;
+    if (!clerk_id) {
+      return res.status(400).json({ error: "clerk_id is required" });
+    }
+    const user = await User.findOne({ clerk_id });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (refresh_token !== undefined)
+      user.calendar_tokens.refresh_token = refresh_token;
+    if (access_token !== undefined)
+      user.calendar_tokens.access_token = access_token;
+    await user.save();
+    res.status(200).json(user.calendar_tokens);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+// @desc    Get a user by clerk_id
+// @route   GET /api/users/clerk/:clerk_id
+export const getUserByClerkId = async (req, res) => {
+  try {
+    const { clerk_id } = req.params;
+    if (!clerk_id) {
+      return res.status(400).json({ error: "clerk_id is required" });
+    }
+    const user = await User.findOne({ clerk_id });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 // @desc    Get calendar_tokens by clerk_id
 // @route   GET /api/users/calendar-tokens/clerk/:clerk_id
 export const getCalendarTokensByClerkId = async (req, res) => {
@@ -55,7 +122,7 @@ export const updateAgentAndPhoneByClerkId = async (req, res) => {
   }
 };
 import User from "../models/user.model.js";
-import fetch from "node-fetch";
+// import fetch from "node-fetch";
 
 // Helper function to call external API and update user
 export const updateAgentIdAndPhoneFromN8n = async (clerk_id) => {
@@ -66,23 +133,48 @@ export const updateAgentIdAndPhoneFromN8n = async (clerk_id) => {
       return;
     }
 
-    console.log("> data sent to n8n: ", user);
-    // Send the user data to the external API
-    const response = await fetch(
-      "https://dhruvthc.app.n8n.cloud/webhook/f61980c4-6159-42a0-91ed-08b36ecc136c",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
+    // console.log("> data sent to n8n: ", user);
+    console.log("> data is sent to n8n: ");
+    // Send the user data to the external API with a long timeout
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5 * 60 * 1000); // 5 minutes
+    let response;
+    try {
+      response = await fetch(
+        "https://dhruvthc.app.n8n.cloud/webhook/f61980c4-6159-42a0-91ed-08b36ecc136c",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(user),
+          signal: controller.signal,
+        }
+      );
+    } catch (fetchErr) {
+      if (fetchErr.name === "AbortError") {
+        throw new Error("Request to n8n timed out after 5 minutes");
       }
-    );
+      throw fetchErr;
+    } finally {
+      clearTimeout(timeout);
+    }
     if (!response.ok) {
       const text = await response.text();
       throw new Error(`External API error: ${response.status} ${text}`);
     }
-    const data = await response.json();
+    let data;
+    try {
+      const text = await response.text();
+      if (!text) {
+        throw new Error("Empty response from n8n");
+      }
+      data = JSON.parse(text);
+    } catch (jsonErr) {
+      throw new Error(
+        "Failed to parse n8n response as JSON: " + jsonErr.message
+      );
+    }
     console.log("> n8n res: ", data);
     if (Array.isArray(data) && data.length > 0) {
       const info = data[0];
@@ -162,7 +254,11 @@ export const updateUserByClerkId = async (req, res) => {
     console.log("User after initial save:", user);
 
     // Call the new function to update agent_id and assigned_phone_number
-    updateAgentIdAndPhoneFromN8n(clerk_id);
+    // updateAgentIdAndPhoneFromN8n(clerk_id);
+    // Call without awaiting, let it run in background
+    updateAgentIdAndPhoneFromN8n(clerk_id).catch((err) =>
+      console.error("Async n8n update failed:", err.message)
+    );
 
     // Return the latest user document (may not have n8n data yet if async)
     res.status(200).json(await User.findOne({ clerk_id }));

@@ -41,6 +41,8 @@ app.use("/api", clerkWebhook);
 app.use(express.json());
 app.use("/api", apiRoutes);
 
+// create a stripe checkout session route here /api/stripe/create-checkout-session
+
 // Health check route
 app.get("/", (req, res) => {
   res.send("Hello World!");
