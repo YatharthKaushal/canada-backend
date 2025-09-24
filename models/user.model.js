@@ -3,8 +3,11 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  agent_id: { type: String, default: "e541fd80-4a50-4544-9f69-ac472a107288" },
-  assigned_phone_number: { type: String, default: "+15393790230" },
+  agent_id: { type: String, default: "" },
+  assigned_phone_number: { type: String, default: "" },
+  // agent_id: { type: String, default: "e541fd80-4a50-4544-9f69-ac472a107288" },
+  // assigned_phone_number: { type: String, default: "+15393790230" },
+  campaignid: { type: [String], default: [] },
   calendar_tokens: {
     refresh_token: {
       type: String,

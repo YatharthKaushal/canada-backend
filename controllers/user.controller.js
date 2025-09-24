@@ -5,7 +5,12 @@ import fetch from "node-fetch";
 
 export const vapiCallHandler = async (req, res) => {
   try {
-    const assistant_id = "5c916527-2c43-4815-970a-73b43fa6a49f";
+    // const assistant_id = "5c916527-2c43-4815-970a-73b43fa6a49f";
+
+    const assistant_id = req.query.assistant_id;
+    if (!assistant_id) {
+      return res.status(400).json({ error: "assistant_id is required" });
+    }
     const response = await fetch(
       `https://api.vapi.ai/call?assistantId=${assistant_id}`,
       {
@@ -19,7 +24,6 @@ export const vapiCallHandler = async (req, res) => {
       }
     );
     const data = await response.json();
-    // console.log(`> vapiCallHandler ${response.status}`, data);
     res.status(response.status).json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -399,5 +403,71 @@ export const assignNumber = async (req, res) => {
     res.status(200).json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+};
+
+// @desc    Update campaignid by clerk_id
+// @route   PUT /api/users/campaignid/clerk/:clerk_id
+export const updateCampaignIdByClerkId = async (req, res) => {
+  try {
+    const { clerk_id } = req.params;
+    const { campaignid } = req.body;
+    if (!clerk_id) {
+      return res.status(400).json({ error: "clerk_id is required" });
+    }
+    if (!campaignid) {
+      return res.status(400).json({ error: "campaignid is required" });
+    }
+    const user = await User.findOne({ clerk_id });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (!Array.isArray(user.campaignid)) user.campaignid = [];
+    if (!user.campaignid.includes(campaignid)) {
+      user.campaignid.push(campaignid);
+    }
+    await user.save();
+    res.status(200).json({ campaignid: user.campaignid });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// @desc    Get all campaign API responses by clerk_id
+// @route   GET /api/users/campaigns/call/clerk/:clerk_id
+export const getAllCampaignApiResponsesByClerkId = async (req, res) => {
+  try {
+    const { clerk_id } = req.params;
+    if (!clerk_id) {
+      return res.status(400).json({ error: "clerk_id is required" });
+    }
+    const user = await User.findOne({ clerk_id });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (!Array.isArray(user.campaignid) || user.campaignid.length === 0) {
+      return res.status(404).json({ error: "No campaign ids found for user" });
+    }
+    const token = "c25561a2-c5db-4293-9f02-de7715a5e2f3";
+    const results = await Promise.all(
+      user.campaignid.map(async (id) => {
+        try {
+          const response = await fetch(`https://api.vapi.ai/campaign/${id}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+          const data = await response.json();
+          return { id, status: response.status, data };
+        } catch (err) {
+          return { id, error: err.message };
+        }
+      })
+    );
+    res.status(200).json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

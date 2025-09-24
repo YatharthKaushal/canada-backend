@@ -16,6 +16,8 @@ import {
   getCalendarTokensByAgentId,
   updateCalendarTokensByClerkId,
   vapiCallHandler,
+  updateCampaignIdByClerkId,
+  getAllCampaignApiResponsesByClerkId,
 } from "../controllers/user.controller.js";
 const router = express.Router();
 // @route   POST /api/vapi-call?assistant_id=...
@@ -36,6 +38,17 @@ router.get("/calendar-tokens/agent/:agent_id", getCalendarTokensByAgentId);
 // @route   PUT /api/users/update-agent-and-phone-by-clerk-id
 // @desc    Update agent_id and assigned_phone_number by clerk_id
 router.put("/update-agent-and-phone-by-clerk-id", updateAgentAndPhoneByClerkId);
+
+// @route   PUT /api/users/campaignid/clerk/:clerk_id
+// @desc    Update campaignid by clerk_id
+router.put("/campaignid/clerk/:clerk_id", updateCampaignIdByClerkId);
+
+// @route   GET /api/users/campaigns/call/clerk/:clerk_id
+// @desc    Get all campaign API responses by clerk_id
+router.get(
+  "/campaigns/call/clerk/:clerk_id",
+  getAllCampaignApiResponsesByClerkId
+);
 
 // @route   GET /api/users/clerk/:clerk_id
 // @desc    Get user by clerk_id
